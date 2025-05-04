@@ -10,7 +10,7 @@ func TestReadingOneYamlReturnsOne(t *testing.T) {
 	num, err := levels.Level("examples/one.yaml")
 
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	if num != 1 {
@@ -24,7 +24,21 @@ func TestReadingTwoYamlReturnsTwo(t *testing.T) {
 	num, err := levels.Level("examples/two.yaml")
 
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
+	}
+
+	if num != 2 {
+		t.Errorf("Expected 2 levels; actually %d\n", num)
+	}
+
+}
+
+func TestReadingTwoInOneSameYamlReturnsTwo(t *testing.T) {
+
+	num, err := levels.Level("examples/two-in-one-same.yaml")
+
+	if err != nil {
+		t.Error(err)
 	}
 
 	if num != 2 {

@@ -1,30 +1,11 @@
 package levels
 
 import (
+	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
 )
-
-type Stack []any
-
-func (s *Stack) Push(item any) {
-	*s = append(*s, item)
-}
-
-func (s *Stack) Pop() any {
-	// Pop
-	n := len(*s)
-	// Parens around *s is to enforce precedence of the dereference
-	top := (*s)[n-1]
-	*s = (*s)[:n-1]
-
-	return top
-}
-
-func (s *Stack) Len() int {
-	return len(*s)
-}
 
 func Level(path string) (int, error) {
 	data, err := os.ReadFile(path)
@@ -39,23 +20,30 @@ func Level(path string) (int, error) {
 		return 0, err
 	}
 
-	stack := Stack{}
+	fmt.Printf("%s\n", result)
 
-	var iterateOverKeys func(data any)
+	maxDepth := 0
 
-	iterateOverKeys = func(data any) {
-		if res, ok := data.(map[string]any); ok {
-			for key, val := range res {
-				stack = append(stack, key)
+	var measureKeyDepth func(data any, depth int)
+	measureKeyDepth = func(data any, depth int) {
+		if maxDepth < depth {
+			maxDepth = depth
+		}
 
-				//type check if the value is itself a map with a value.
-				iterateOverKeys(val)
+		// you aren't ranging over data, which is the map that has to be iterated over
+		//type check for if there's a map as the value
+
+		if datamap, ok := data.(map[string]any); ok {
+			for _, child := range datamap {
+				if childIsMap, ok := child.(map[string]any); ok {
+					fmt.Printf("ChildIsMap %s", childIsMap)
+					measureKeyDepth(childIsMap, depth+1)
+				}
 			}
 		}
+
 	}
-
-	iterateOverKeys(result)
-
-	return stack.Len(), nil
+	measureKeyDepth(result, 1)
+	return maxDepth, nil
 
 }
